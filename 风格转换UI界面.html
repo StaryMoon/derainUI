@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="en">
+ <head>
+  <meta charset="UTF-8">
+  <title>在线转换</title>
+  <style>
+    .background{
+        background-image: url("bg.gif");
+        position: absolute;
+        background-repeat:no-repeat;
+        display:block;
+        height: 120%;
+        width: 100%;
+        left:0px;
+        top:0px;
+        z-index: -1;
+    }
+	.container{ 
+        margin: 0 auto; 
+        max-width: 720px;
+    }
+    label{
+        color: #94070A;
+    }
+	.clear::after{
+        clear:both; 
+        display: block; 
+        content:"";
+    }
+	h1{
+        color: #94070A;
+        text-align: center;
+    } /*北大红 */
+    .loading{
+        position: absolute;
+        size:50px;
+        right:100px;
+        top:120px;
+        display: none;
+        background: #000;
+    }
+	.pic{ position:relative; margin:10px;}
+	.pic img{ 
+        display:block;
+        width: 256px; 
+        height: 256px;
+        object-fit:cover;
+    }
+    .pic img:hover{
+        cursor: pointer;
+    }
+	.pic img:nth-child(1){ z-index: 1; }
+	.pic img:nth-child(2){ z-index: 2; position:absolute; top:0px; left:0px;}
+    button:hover{
+        cursor: pointer;
+    }
+  </style>
+ </head>
+ <body>
+<div class = "background"></div>
+<div class="container clear">
+	<h1>在线风格化</h1>
+    <label for = "img_file">选择图片</label><input type="file" id="content_file" onchange="showcontent()">
+    <label for = "img_file">选择风格</label><input type="file" id="style_file" onchange="showstyle()">
+	<button onclick="showloading();
+    exec1('python test_html.py')"
+    id="111" >开始转换</button>
+    <img src = "loading.gif" alt = "加载中" class = "loading" id = "loading">
+	<div class="pic clear">
+		<img alt = "" id = "result_id">
+		<img alt = "" id = "img_id">
+	</div>
+    <div class="pic clear">
+		<img alt = "" id = "style_id">
+	</div>
+
+</div>
+
+	<script src="https://cdn.bootcdn.net/ajax/libs/jquery/3.5.0/jquery.js"></script>
+	<script>
+	$(function(){
+		$(".pic img:nth-of-type(even)").on("click", function(){
+			$(this).animate({"opacity":0}, 3000);
+		});
+	});
+	</script>
+    <script>
+        function showloading(){
+            // alert(1);
+            var obj = document.getElementById("loading");
+            // alert(2);
+            obj.style.display = "block";
+        };
+    </script>
+    <script language="javascript">   
+        function exec1 (command) {     
+            var ws = new ActiveXObject("WScript.Shell");      
+	        ws.run(command);  
+            alert("转换完成！点击图片试一试~")
+            var obj = document.getElementById("loading");
+            obj.style.display = "none";
+        }   
+    </script> 
+    <script language="javascript">
+        var file;
+        var file2;
+        var contentname;
+        var stylename;
+        function showcontent(){
+            // var img_file =  $("#img_file").val();
+            file =  document.getElementById('content_file').files[0];
+            var re = new FileReader();
+            re.readAsDataURL(file);
+            contentname = file.name[0];
+            var it = 1;
+            while(1){
+                if(file.name[it] != '.'){
+                    contentname += file.name[it];
+                    it++;
+                }
+                else break;
+            }
+            re.onload = function(re){
+                $('#img_id').attr("src", re.target.result);
+            }
+        }
+        function showstyle(){
+            file2 =  document.getElementById('style_file').files[0];
+            var re2 = new FileReader();
+            re2.readAsDataURL(file2);
+            stylename = file2.name[0];
+            var it2 = 1;
+            while(1){
+                if(file2.name[it2] != '.'){
+                    stylename += file2.name[it2];
+                    it2++;
+                }
+                else break;
+            }
+            re2.onload = function(re2){
+                $('#style_id').attr("src", re2.target.result);
+                $('#result_id').attr("src","output/"+contentname+"_stylized_"+stylename+".jpg")
+            }
+        }
+    </script>
+ </body>
+</html>
