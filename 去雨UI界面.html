@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html lang="en">
+ <head>
+  <meta charset="UTF-8">
+  <title>在线转换</title>
+  <style>
+    .background{
+        background-image: url("bg.gif");
+        position: absolute;
+        background-repeat:no-repeat;
+        display:block;
+        height: 120%;
+        width: 100%;
+        left:0px;
+        top:0px;
+        z-index: -1;
+    }
+	.container{ 
+        margin: 0 auto; 
+        max-width: 720px;
+    }
+    label{
+        color: #94070A;
+    }
+	.clear::after{
+        clear:both; 
+        display: block; 
+        content:"";
+    }
+	h1{
+        color: #94070A;
+        text-align: center;
+    } /*北大红 */
+    .loading{
+        position: absolute;
+        size:50px;
+        right:100px;
+        top:120px;
+        display: none;
+        background: #000;
+    }
+	.pic{ position:relative; margin:10px;}
+	.pic img{ 
+        display:block;
+        width: 256px; 
+        height: 256px;
+        object-fit:cover;
+    }
+    .pic img:hover{
+        cursor: pointer;
+    }
+	.pic img:nth-child(1){ z-index: 1; }
+	.pic img:nth-child(2){ z-index: 2; position:absolute; top:0px; left:0px;}
+    button:hover{
+        cursor: pointer;
+    }
+  </style>
+ </head>
+ <body>
+<div class = "background"></div>
+<div class="container clear">
+	<h1>在线去雨</h1>
+    <label for = "img_file">选择图片</label><input type="file" id="content_file" onchange="showcontent()">
+	<button onclick="transstyle()">开始去雨</button>
+    <!-- <img src = "loading.gif" alt = "加载中" class = "loading" id = "loading"> -->
+	<div class="pic clear">
+		<img alt = "" id = "result_id">
+		<img alt = "" id = "img_id">
+	</div>
+
+</div>
+
+	<script src="https://cdn.bootcdn.net/ajax/libs/jquery/3.5.0/jquery.js"></script>
+	<script>
+	$(function(){
+		$(".pic img:nth-of-type(even)").on("click", function(){
+			$(this).animate({"opacity":0}, 3000);
+		});
+	});
+	</script>
+
+    <script type="text/javascript">
+        if ("WebSocket" in window){
+         console.log("您的浏览器支持 WebSocket!");
+         var ws = new WebSocket("ws://localhost:5678");
+
+         ws.onopen = function(){
+            console.log("websocket 已连接上");
+         }
+
+         ws.onmessage = function (evt) {
+            var dataReceive = evt.data;
+            console.log("数据已接收..."+dataReceive);
+            $('#history').val($('#history').val()+dataReceive+"\n");
+         };
+
+         ws.onclose = function()
+            {
+              console.log("连接已关闭...");
+         };
+
+      }else{
+         // 浏览器不支持 WebSocket
+         console.log("您的浏览器不支持 WebSocket!");
+      }
+    </script>
+
+
+    <script type="text/javascript">   
+        const sleep = (delay) => new Promise((resolve) => setTimeout(resolve, delay))
+        const alert_result = async() => {
+            await sleep(7000);
+            alert("去雨完成！点击图片试一试~");
+            reload += 1;
+            // location.reload();
+        }
+
+
+        function transstyle(){    
+            file =  document.getElementById('content_file').files[0];
+            var re = new FileReader();
+            re.readAsDataURL(file);
+            var content = file.name;
+            console.log(content);
+
+            ws.send(content);
+            alert_result();
+            file =  document.getElementById('content_file').files[0];
+            var re = new FileReader();
+            re.readAsDataURL(file);
+            var content = file.name;
+            console.log(content);
+            $('#result_id').attr("src","output/"+'no'+content);
+        }   
+    </script> 
+    <script language="javascript">
+        var file;
+        var file2;
+        var contentname;
+        var stylename;
+        var reload = 0;
+        function showcontent(){
+            // var img_file =  $("#img_file").val();
+            file =  document.getElementById('content_file').files[0];
+            var re = new FileReader();
+            re.readAsDataURL(file);
+            contentname = file.name[0];
+            var it = 1;
+            while(1){
+                if(file.name[it] != '.'){
+                    contentname += file.name[it];
+                    it++;
+                }
+                else break;
+            }
+            re.onload = function(re){
+                $('#img_id').attr("src", re.target.result);
+                // $('#result_id').attr("src","output/"+'no'+content);
+            }
+        }
+        function showstyle(){
+            file2 =  document.getElementById('style_file').files[0];
+            var re2 = new FileReader();
+            re2.readAsDataURL(file2);
+            stylename = file2.name[0];
+            var it2 = 1;
+            while(1){
+                if(file2.name[it2] != '.'){
+                    stylename += file2.name[it2];
+                    it2++;
+                }
+                else break;
+            }
+            re2.onload = function(re2){
+                $('#style_id').attr("src", re2.target.result);
+                $('#result_id').attr("src","output/"+'no'+content);
+            }
+        }
+    </script>
+ </body>
+</html>
