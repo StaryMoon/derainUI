@@ -39,7 +39,14 @@ opt = parser.parse_args()
 
 # device = torch.device('cuda:{}'.format(opt.gpu_id[0])) if opt.gpu_id else torch.device('cpu')
 device = torch.device('cpu')
-
+# Build model
+print('Loading model ...\n')
+model = PReNet(opt.recurrent_iter, opt.use_GPU, opt=opt)
+print_network(model)
+if opt.use_GPU:
+        model = model.to(device)
+model.load_state_dict(torch.load(os.path.join('H_net_epoch_100.pth'),map_location='cpu'))
+model.eval()
 
 def getByte(path):
     with open(path, 'rb') as f:
@@ -76,15 +83,6 @@ def message_received(client, server, message):
         # message_list = message.split('#')
         
         os.makedirs(opt.save_path, exist_ok=True)
-
-        # Build model
-        print('Loading model ...\n')
-        model = PReNet(opt.recurrent_iter, opt.use_GPU, opt=opt)
-        print_network(model)
-        if opt.use_GPU:
-                model = model.to(device)
-        model.load_state_dict(torch.load(os.path.join('H_net_epoch_100.pth'),map_location='cpu'))
-        model.eval()
 
         time_test = 0
         count = 0
