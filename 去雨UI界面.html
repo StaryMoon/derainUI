@@ -60,8 +60,13 @@
 <div class = "background"></div>
 <div class="container clear">
 	<h1>在线去雨</h1>
-    <label for = "img_file">选择图片</label><input type="file" id="content_file" onchange="showcontent()">
-	<button onclick="transstyle()">开始去雨</button>
+    <!-- <form id="form1" action="localhost:5678" method="POST" enctype="multipart/form-data"> -->
+        <!-- <div class="formbox"> -->
+        <label for = "img_file">选择图片</label><input type="file" id="content_file" name="img" onchange="showcontent()">
+        <button onclick="transstyle()">开始去雨</button>
+        <!-- </div> -->
+    <!-- </form> -->
+
     <!-- <img src = "loading.gif" alt = "加载中" class = "loading" id = "loading"> -->
 	<div class="pic clear">
 		<img alt = "" id = "result_id">
@@ -71,6 +76,7 @@
 </div>
 
 	<script src="https://cdn.bootcdn.net/ajax/libs/jquery/3.5.0/jquery.js"></script>
+
 	<script>
 	$(function(){
 		$(".pic img:nth-of-type(even)").on("click", function(){
@@ -91,7 +97,9 @@
          ws.onmessage = function (evt) {
             var dataReceive = evt.data;
             console.log("数据已接收..."+dataReceive);
-            $('#history').val($('#history').val()+dataReceive+"\n");
+            // $('#history').val($('#history').val()+dataReceive+"\n");
+            $('#result_id').attr("src","data:image/png;base64,"+dataReceive);
+            alert("去雨完成！点击图片试一试~");
          };
 
          ws.onclose = function()
@@ -107,30 +115,30 @@
 
 
     <script type="text/javascript">   
-        const sleep = (delay) => new Promise((resolve) => setTimeout(resolve, delay))
-        const alert_result = async() => {
-            await sleep(7000);
-            alert("去雨完成！点击图片试一试~");
-            reload += 1;
-            // location.reload();
-        }
-
+        // const sleep = (delay) => new Promise((resolve) => setTimeout(resolve, delay))
+        // const alert_result = async() => {
+        //     await sleep(1000);
+        //     alert("去雨完成！点击图片试一试~");
+        //     // location.reload();
+        // }
 
         function transstyle(){    
             file =  document.getElementById('content_file').files[0];
             var re = new FileReader();
             re.readAsDataURL(file);
             var content = file.name;
-            console.log(content);
 
-            ws.send(content);
-            alert_result();
+            var obj = document.getElementById('img_id');
+            var content_base64 = obj.src;
+            console.log("haha:",content_base64);
+
+            ws.send(content_base64);
+            // alert_result();
             file =  document.getElementById('content_file').files[0];
             var re = new FileReader();
             re.readAsDataURL(file);
             var content = file.name;
             console.log(content);
-            $('#result_id').attr("src","output/"+'no'+content);
         }   
     </script> 
     <script language="javascript">
@@ -158,24 +166,24 @@
                 // $('#result_id').attr("src","output/"+'no'+content);
             }
         }
-        function showstyle(){
-            file2 =  document.getElementById('style_file').files[0];
-            var re2 = new FileReader();
-            re2.readAsDataURL(file2);
-            stylename = file2.name[0];
-            var it2 = 1;
-            while(1){
-                if(file2.name[it2] != '.'){
-                    stylename += file2.name[it2];
-                    it2++;
-                }
-                else break;
-            }
-            re2.onload = function(re2){
-                $('#style_id').attr("src", re2.target.result);
-                $('#result_id').attr("src","output/"+'no'+content);
-            }
-        }
+        // function showstyle(){
+        //     file2 =  document.getElementById('style_file').files[0];
+        //     var re2 = new FileReader();
+        //     re2.readAsDataURL(file2);
+        //     stylename = file2.name[0];
+        //     var it2 = 1;
+        //     while(1){
+        //         if(file2.name[it2] != '.'){
+        //             stylename += file2.name[it2];
+        //             it2++;
+        //         }
+        //         else break;
+        //     }
+        //     re2.onload = function(re2){
+        //         $('#style_id').attr("src", re2.target.result);
+        //         $('#result_id').attr("src","output/"+'no'+content);
+        //     }
+        // }
     </script>
  </body>
 </html>
