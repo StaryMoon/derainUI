@@ -54,17 +54,6 @@ def getByte(path):
     img_str = img_byte.decode('ascii')
     return img_str
 
-def D_BASE64(origStr):
-    #base64 decode should meet the padding rules
-    if(len(origStr)%3 == 1): 
-        origStr += "=="
-    elif(len(origStr)%3 == 2): 
-        origStr += "=" 
-
-    origStr = bytes(origStr, encoding='utf8')
-    dStr = base64.b64decode(origStr).decode()
-    print("BASE64 Decode result is: \n" + dStr)
-    return dStr
 
 def new_client(client, server):
         print("New client connected and was given id %d" % client['id'])
@@ -77,8 +66,8 @@ def client_left(client, server):
 
 # Called when a client sends a message
 def message_received(client, server, message):
-        if len(message) > 200:
-                message = message[:200]+'..'
+        # if len(message) > 200:
+        #         message = message[:200]+'..'
         # print("Client(%d)_address%s said: %s" % (client['id'],client['address'], message))
         # message_list = message.split('#')
         
@@ -104,10 +93,9 @@ def message_received(client, server, message):
         # print("message:",message)
         img_message = message.replace("data:image/png;base64,","")
         img_message += "=="
-        print("img_message:",type(img_message),img_message)
-        # with open ("1.txt",'wb') as f:
-        #         f.write(str(img_message))
-
+        # print("img_message:",type(img_message),img_message)
+        with open ("1.txt","w") as f:
+                f.write(img_message)
         img = base64.b64decode(img_message)
         # print(img)
         file = open('input/rain.png','wb')
