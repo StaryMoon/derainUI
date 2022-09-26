@@ -25,7 +25,7 @@ from torch.autograd import Variable
 from utils import *
 from networks import *
 import time 
-
+import base64
 
 parser = argparse.ArgumentParser(description="PReNet_Test")
 parser.add_argument("--data_path", type=str, default="input", help='path to training data')
@@ -41,10 +41,23 @@ opt = parser.parse_args()
 device = torch.device('cpu')
 
 
+def getByte(path):
+    with open(path, 'rb') as f:
+        img_byte = base64.b64encode(f.read())
+    img_str = img_byte.decode('ascii')
+    return img_str
 
+def D_BASE64(origStr):
+    #base64 decode should meet the padding rules
+    if(len(origStr)%3 == 1): 
+        origStr += "=="
+    elif(len(origStr)%3 == 2): 
+        origStr += "=" 
 
-
-
+    origStr = bytes(origStr, encoding='utf8')
+    dStr = base64.b64decode(origStr).decode()
+    print("BASE64 Decode result is: \n" + dStr)
+    return dStr
 
 def new_client(client, server):
         print("New client connected and was given id %d" % client['id'])
@@ -60,7 +73,7 @@ def message_received(client, server, message):
         if len(message) > 200:
                 message = message[:200]+'..'
         # print("Client(%d)_address%s said: %s" % (client['id'],client['address'], message))
-        message_list = message.split('#')
+        # message_list = message.split('#')
         
         os.makedirs(opt.save_path, exist_ok=True)
 
@@ -78,14 +91,32 @@ def message_received(client, server, message):
         sum_psnr = 0
         sum_ssim = 0
         # for img_name in os.listdir(opt.data_path):
+
+
         # if is_image(img_name):
-        img_name = message
-        img_path = os.path.join(opt.data_path, img_name)
+        # img_name = message
+        # img_path = os.path.join(opt.data_path, img_name)
+
+
         # target_path = "RainTestH/norain/"+"no"+img_name
         # target_path = "RainDisstilationH/rain/"+img_name
         # target = cv2.imread(target_path)
         # input image
-        y = cv2.imread(img_path)
+
+        # print("message:",message)
+        img_message = message.replace("data:image/png;base64,","")
+        img_message += "=="
+        print("img_message:",type(img_message),img_message)
+        # with open ("1.txt",'wb') as f:
+        #         f.write(str(img_message))
+
+        img = base64.b64decode(img_message)
+        # print(img)
+        file = open('input/rain.png','wb')
+        file.write(img)
+
+        y = cv2.imread('input/rain.png')        
+
         b, g, r = cv2.split(y)
         y = cv2.merge([r, g, b])
         #y = cv2.resize(y, (int(500), int(500)), interpolation=cv2.INTER_CUBIC)
@@ -111,7 +142,7 @@ def message_received(client, server, message):
                 dur_time = end_time - start_time
                 time_test += dur_time
 
-                print(img_name, ': ', dur_time)
+                # print(img_name, ': ', dur_time)
 
         if opt.use_GPU:
                 save_out = np.uint8(255 * out.data.cpu().numpy().squeeze())   #back to cpu
@@ -122,12 +153,13 @@ def message_received(client, server, message):
         b, g, r = cv2.split(save_out)
         save_out = cv2.merge([r, g, b])
 
-        cv2.imwrite(os.path.join(opt.save_path,'no'+img_name), save_out)
-        print(img_name,"Derain done!")
+        cv2.imwrite(os.path.join(opt.save_path,'norain.png'), save_out)
+        print("Derain done!")
 
-
-        server.send_message(client,'用户编号'+str(client['id'])+':'+message)
-
+        img_str = getByte(os.path.join(opt.save_path,'norain.png'))
+        server.send_message(client,img_str)
+        
+        # server.send_message(client,'用户编号'+str(client['id'])+':'+message)
 
 
 server = WebsocketServer(host='localhost',port=5678)
